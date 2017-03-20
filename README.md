@@ -1,7 +1,8 @@
 # dg_curtain
-The Curtain widget for DrupalGap 8.
 
-With a `curtain` widget, you can easily place a `+/-` button that toggles the visibility of some content. Similar to an expandable/collapsible widget, the `curtain` is a handy widget:
+The Curtain widget for DrupalGap 8. A must have widget for slide menus and revealing content.
+
+With a `curtain` widget, you can easily place button that toggles the visibility of some content or reveals a slide menu.
 
 ```
 var html = dg.theme('curtain', {
@@ -18,10 +19,10 @@ var html = dg.theme('curtain', {
       }
     },
     
-    // Do something before opening the curtain.
+    // Optional: Do something before opening the curtain.
     before: function() { /** do stuff **/ },
     
-    // Do something after opening the curtain.
+    // Optional: Do something after opening the curtain.
     after: function() { /** do stuff **/ }
   },
   
@@ -52,14 +53,14 @@ var html = dg.theme('curtain', {
       }
     },
     
-    // Do something before closing the curtain.
+    // Optional: Do something before closing the curtain.
     before: function() { /** do stuff **/ },
     
-    // Do something after closing the curtain.
+    // Optional: Do something after closing the curtain.
     after: function() { /** do stuff **/ }
   },
   
-  // The wrapper around the button.
+  // Optional: A wrapper around the button.
   _button_wrapper: {
     _format: 'div',
     _attributes: {
@@ -77,10 +78,11 @@ Like all widgets, a `curtain` can easily be ran through the DrupalGap render ele
 var element = {};
 element.foo = {
   _theme: 'curtain',
-  _open: /* ... */,
-  _fill: /* ... */,
-  _close: /* ... */,
-  _button_wrapper: /* ... */
+  _open: { /* ... */ },
+  _panel: { /* ... */ },
+  _fill: { /* ... */ },
+  _close: { /* ... */ },
+  _button_wrapper: { /* ... */ }
 };
 return element;
 ```
