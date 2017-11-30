@@ -167,6 +167,10 @@ dg._curtainClick = function(button, direction) {
   }
 
   // Run after handler, if any.
-  if (curtain[opKey].after) { curtain[opKey].after(isPanel ? button : newButton, curtain); }
+  if (curtain[opKey].after) {
+    setTimeout(function() {
+      curtain[opKey].after(isPanel ? button : newButton, curtain);
+    }, 1);
+  }
 
 };
