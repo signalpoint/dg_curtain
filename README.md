@@ -28,7 +28,7 @@ var html = dg.theme('curtain', {
   },
   
   // Optional: Used to open the curtain in a context menu.
-  //context: {
+  //_context: {
   //  side: 'right' // 'left' or 'right'
   //},
 
