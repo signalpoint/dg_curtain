@@ -1,5 +1,44 @@
 dg._curtains = {};
 
+dg_curtain._curtain = null;
+
+dg_curtain.getCurtain = function() {
+  return dg_curtain._curtain;
+};
+
+dg_curtain.setCurtain = function(curtain) {
+  dg_curtain._curtain = curtain;
+};
+
+dg_curtain.clearCurtain = function() {
+  dg_curtain._curtain = null;
+};
+
+dg_curtain.getButton = function() {
+  var curtain = dg_curtain.getCurtain();
+  return curtain ? document.getElementById(curtain._open.button._attributes.id) : null;
+};
+
+dg_curtain.getContainer = function() {
+  var curtain = dg_curtain.getCurtain();
+  return curtain ? document.getElementById(curtain._attributes.id) : null;
+};
+
+dg_curtain.isOpen = function() {
+  var container = dg_curtain.getContainer();
+  console.log(container);
+  return container && container.style.display != 'none';
+};
+
+dg_curtain.close = function() {
+  var button = dg_curtain.getButton();
+  if (button) {
+    //console.log('removing click handler');
+    //window.removeEventListener('click', dg_curtain.onclick);
+    button.click();
+  }
+};
+
 /**
  *
  * @param variables
@@ -27,6 +66,7 @@ dg.theme_curtain = function(variables) {
   var openOptions = variables._open ? variables._open : {};
   var openBtn = openOptions.button ? openOptions.button : {};
   if (!openBtn._attributes) { openBtn._attributes = {}; }
+  if (!openBtn._attributes.id) { openBtn._attributes.id = jDrupal.userPassword(); }
   if (!openBtn._attributes.onclick) { openBtn._attributes.onclick = "dg._curtainClick(this, 'open')"; }
   if (!openBtn._attributes.for) { openBtn._attributes.for = id; }
 
@@ -39,7 +79,9 @@ dg.theme_curtain = function(variables) {
       dg._curtainButtonRender(openBtn, curtain, 'open') +
       dg._curtainBtnWrapClose(curtain);
 };
+
 dg._curtainBtnWrapOpen = function(curtain) {
+
   var btnWrapper = curtain._button_wrapper ? curtain._button_wrapper : null;
   if (!btnWrapper) { return ''; }
   dg.elementAttributesInit(btnWrapper);
@@ -48,24 +90,30 @@ dg._curtainBtnWrapOpen = function(curtain) {
   curtain._button_wrapper = btnWrapper;
   return '<' + btnWrapper._format + ' ' + dg.attributes(btnWrapper._attributes) + '>'
 };
+
 dg._curtainBtnWrapClose = function(curtain) {
   return curtain._button_wrapper ? '</' + curtain._button_wrapper._format + '>' : '';
 };
+
 dg._curtainButtonRender = function(btn, curtain, direction) {
   var btnType = btn._type ? btn._type : 'link'; // or 'button'
   var btnText = btn._text ? btn._text : direction == 'open' ? '+' : '-';
   return btnType == 'link' ? dg.l(btnText, null, btn) : dg.b(btnText, btn);
 };
+
 dg._curtainClick = function(button, direction) {
+  //console.log(direction, button);
 
   // Grab the curtain id and load the curtain.
   var id = button.getAttribute('for');
   var curtain = dg._curtains[id];
-  var isPanel = curtain._panel;
+  var isContext = !!curtain._context;
+  var isPanel = !isContext && curtain._panel; // Context config overrides panel config, developer can't have both.
 
   var op = direction == 'open' ? 'close' : 'open';
   var opKey = '_' + direction;
   var btnKey = '_' + op;
+  var btnId = button.getAttribute('id');
 
   // Run before handler, if any.
   if (curtain[opKey].before) { curtain[opKey].before(button, curtain); }
@@ -78,6 +126,7 @@ dg._curtainClick = function(button, direction) {
     var btnOptions = curtain[btnKey] ? curtain[btnKey] : {};
     var btn = btnOptions.button ? btnOptions.button : {};
     if (!btn._attributes) { btn._attributes = {}; }
+    btn._attributes.id = btnId;
     if (!btn._attributes.onclick) { btn._attributes.onclick = "dg._curtainClick(this, '" + op + "')"; }
     if (!btn._attributes.for) { btn._attributes.for = id; }
 
@@ -89,16 +138,20 @@ dg._curtainClick = function(button, direction) {
 
   }
 
-  // Place the container in the DOM the first time the curtain is opened, subsequenet times, just
-  // toggle its visibility.
+  // Place the container in the DOM the first time the curtain is opened, subsequent times, just toggle its visibility.
   if (direction == 'open') {
     var container = document.getElementById(id);
     if (!container) {
       //console.log(curtain);
 
-      // Add class names for panels.
-      if (isPanel) {
-        curtain._attributes.class.push(
+      // Add class names for contexts or for panels.
+      var classNames = curtain._attributes.class;
+      if (isContext) {
+        classNames.push('context-menu');
+        if (curtain._context.side) { classNames.push('context-menu-' + curtain._context.side); }
+      }
+      else if (isPanel) {
+        classNames.push(
             'side-panel',
             curtain._panel.side ? 'side-panel-' + curtain._panel.side : 'side-panel-left'
         );
@@ -128,23 +181,44 @@ dg._curtainClick = function(button, direction) {
         var closeOptions = curtain._close ? curtain._close : {};
         var closeBtn = closeOptions.button ? closeOptions.button : {};
         if (!closeBtn._attributes) { closeBtn._attributes = {}; }
+        closeBtn._attributes.id = btnId;
         if (!closeBtn._attributes.onclick) { closeBtn._attributes.onclick = "dg._curtainClick(this, 'close')"; }
         if (!closeBtn._attributes.for) { closeBtn._attributes.for = id; }
 
         // Put the close button at the top of the panel.
         fill = dg._curtainButtonRender(closeBtn, curtain, 'close') + fill;
 
-        // Set up a post render with timeout to slide open the panel.
-        dg._postRender.push(function() {
-          setTimeout(function() {
-            document.getElementById(id).style.width = "250px";
-          }, 50);
-        });
-
       }
 
-      // Now that the container exists in the DOM, fill the content and run any post renders.
-      document.getElementById(id).innerHTML = direction == 'open' ? fill : '';
+      // Now that the container exists in the DOM, grab it and fill the content.
+      container = document.getElementById(id);
+      container.innerHTML = direction == 'open' ? fill : '';
+
+      // Set up a post render with timeout...
+      dg._postRender.push(function() {
+        setTimeout(function() {
+
+          // Listen for clicks outside modal to close it.
+          if (isContext) {
+            //console.log('add event listener');
+            //window.addEventListener('click', dg_curtain.onclick, false);
+          }
+          // To slide open the panel.
+          else if (isPanel) {
+            document.getElementById(id).style.width = "250px";
+          }
+
+        }, 50);
+      });
+
+      // If it's a context menu, offset its left/right position in a negative direction using the width of the content
+      // in the menu, thus bringing it back into view.
+      //if (isContext) {
+      //  console.log(container.offsetWidth);
+      //  container.style.left = '-' + container.offsetWidth + 'px';
+      //}
+
+      // Run any post renders.
       dg.runPostRenders();
 
     }
@@ -152,10 +226,23 @@ dg._curtainClick = function(button, direction) {
 
       // Make the container visible again.
       var curtainElement = document.getElementById(id);
-      if (isPanel) { curtainElement.style.width = "250px"; }
-      else { curtainElement.style.display = 'block'; }
+      if (isPanel) {
+        curtainElement.style.width = "250px";
+      }
+      else {
+        curtainElement.style.display = 'block';
+        //if (isContext) {
+        //  setTimeout(function() {
+        //    console.log('add event listener');
+        //    window.addEventListener('click', dg_curtain.onclick, false);
+        //  }, 1);
+        //}
+      }
 
     }
+
+    dg_curtain.setCurtain(curtain);
+
   }
   else { // Closing...
 
@@ -163,6 +250,8 @@ dg._curtainClick = function(button, direction) {
     var curtainElement = document.getElementById(id);
     if (isPanel) { curtainElement.style.width = '0'; }
     else { curtainElement.style.display = 'none'; }
+
+    dg_curtain.clearCurtain();
 
   }
 
@@ -174,3 +263,19 @@ dg._curtainClick = function(button, direction) {
   }
 
 };
+
+//dg_curtain.onclick = function(event) {
+//  var curtain = dg_curtain.getCurtain();
+//  console.log('click!');
+//  console.log('target', event.target);
+//  console.log('curtain', curtain);
+//  console.log('button', dg_curtain.getButton());
+//  var container = dg_curtain.getContainer();
+//  var containerId = container.getAttribute('id');
+//  var button = dg_curtain.getButton();
+//  var buttonId = container.getAttribute('id');
+//  // && event.target != dg_curtain.getButton()
+//  if (event.target.getAttribute('id') == container && dg_curtain.isOpen()) {
+//    dg_curtain.close();
+//  }
+//};

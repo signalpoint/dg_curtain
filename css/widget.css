@@ -1,4 +1,16 @@
 /**
+ * CONTEXTS
+ */
+.curtain.context-menu {
+    position: absolute;
+}
+.curtain.context-menu-left {
+    left: 0;
+}
+.curtain.context-menu-right {
+    right: 0;
+}
+/**
  * PANELS
  */
 /* The side navigation menu */

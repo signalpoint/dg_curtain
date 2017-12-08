@@ -1,8 +1,9 @@
 # dg_curtain
 
-The Curtain widget for DrupalGap 8. A must have widget for slide menus and revealing content.
+The Curtain widget for DrupalGap 8. A must have widget for slide menus, context menus and revealing content.
 
-With a `curtain` widget, you can easily place button that toggles the visibility of some content or reveals a slide menu.
+With a `curtain` widget, you can easily place button that toggles the visibility of some content, reveals a context
+menu or reveals a slide menu.
 
 ```
 var html = dg.theme('curtain', {
@@ -26,6 +27,11 @@ var html = dg.theme('curtain', {
     after: function() { /** do stuff **/ }
   },
   
+  // Optional: Used to open the curtain in a context menu.
+  //context: {
+  //  side: 'right' // 'left' or 'right'
+  //},
+
   // Optional: Used to open the curtain in a sidebar panel.
   _panel: {
     side: 'right' // 'left' or 'right', defaults to 'left'
