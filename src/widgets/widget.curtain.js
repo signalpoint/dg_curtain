@@ -170,7 +170,6 @@ dg._curtainClick = function(button, direction) {
         button.parentNode.insertBefore(div.firstChild, button.nextSibling);
       }
 
-
       // Render the content to be filled in the container.
       var fill = dg.render(curtain._fill());
 
@@ -185,6 +184,7 @@ dg._curtainClick = function(button, direction) {
         if (!closeBtn._attributes.onclick) { closeBtn._attributes.onclick = "dg._curtainClick(this, 'close')"; }
         if (!closeBtn._attributes.for) { closeBtn._attributes.for = id; }
 
+
         // Put the close button at the top of the panel.
         fill = dg._curtainButtonRender(closeBtn, curtain, 'close') + fill;
 
@@ -198,7 +198,7 @@ dg._curtainClick = function(button, direction) {
       dg._postRender.push(function() {
         setTimeout(function() {
 
-          // Listen for clicks outside modal to close it.
+          // Listen for clicks outside context to close it.
           if (isContext) {
             //console.log('add event listener');
             //window.addEventListener('click', dg_curtain.onclick, false);
