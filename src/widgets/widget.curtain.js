@@ -56,7 +56,7 @@ dg.theme_curtain = function(variables) {
   // @TODO the global curtain container needs to be purged during page transitions
 
   // Grab the container id, or generate a random one.
-  if (!variables._attributes.id) { variables._attributes.id = dg.userPassword(); }
+  if (!variables._attributes.id) { variables._attributes.id = dg.salt(); }
   var id = variables._attributes.id;
 
   variables._attributes.class.push('curtain');
@@ -66,7 +66,7 @@ dg.theme_curtain = function(variables) {
   var openOptions = variables._open ? variables._open : {};
   var openBtn = openOptions.button ? openOptions.button : {};
   if (!openBtn._attributes) { openBtn._attributes = {}; }
-  if (!openBtn._attributes.id) { openBtn._attributes.id = jDrupal.userPassword(); }
+  if (!openBtn._attributes.id) { openBtn._attributes.id = dg.salt(); }
   if (!openBtn._attributes.onclick) { openBtn._attributes.onclick = "dg._curtainClick(this, 'open')"; }
   if (!openBtn._attributes.for) { openBtn._attributes.for = id; }
 
@@ -74,10 +74,29 @@ dg.theme_curtain = function(variables) {
   dg._curtains[id] = variables;
   var curtain = dg._curtains[id];
 
+  // Replacing?
+  // No need for this, just exclude the open and close wrapper and the curtain already does this shit, I think you
+  // are thinking of a bucket widget to utilize this replace feature ya dumb dumb.
+  //if (variables._replace) {
+  //  var format = variables._format ? variables._format : 'div';
+  //  var randomId = dg.salt();
+  //  var targetId = format + '-' + randomId;
+  //  return dg.render({
+  //    _markup: '<' + format + ' id="' + targetId + '"></' + format + '>',
+  //    _postRender: [function() {
+  //      document.getElementById(targetId).outerHTML = dg.render(
+  //          dg._curtainButtonRender(openBtn, curtain, 'open'),
+  //          true
+  //      );
+  //    }]
+  //  }, true);
+  //}
+
   // Render the button and return it.
   return dg._curtainBtnWrapOpen(curtain) +
       dg._curtainButtonRender(openBtn, curtain, 'open') +
       dg._curtainBtnWrapClose(curtain);
+
 };
 
 dg._curtainBtnWrapOpen = function(curtain) {
@@ -170,6 +189,7 @@ dg._curtainClick = function(button, direction) {
         button.parentNode.insertBefore(div.firstChild, button.nextSibling);
       }
 
+
       // Render the content to be filled in the container.
       var fill = dg.render(curtain._fill());
 
@@ -184,7 +204,6 @@ dg._curtainClick = function(button, direction) {
         if (!closeBtn._attributes.onclick) { closeBtn._attributes.onclick = "dg._curtainClick(this, 'close')"; }
         if (!closeBtn._attributes.for) { closeBtn._attributes.for = id; }
 
-
         // Put the close button at the top of the panel.
         fill = dg._curtainButtonRender(closeBtn, curtain, 'close') + fill;
 
@@ -198,7 +217,7 @@ dg._curtainClick = function(button, direction) {
       dg._postRender.push(function() {
         setTimeout(function() {
 
-          // Listen for clicks outside context to close it.
+          // Listen for clicks outside modal to close it.
           if (isContext) {
             //console.log('add event listener');
             //window.addEventListener('click', dg_curtain.onclick, false);
