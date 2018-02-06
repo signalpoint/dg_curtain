@@ -37,6 +37,9 @@ var html = dg.theme('curtain', {
     side: 'right' // 'left' or 'right', defaults to 'left'
   },
   
+  // Optional: Use to open the curtain in a target element located somewhere else. Does not work with context or panel.
+  //_target: '#foo'
+
   // The content to fill into the curtain when it is opened.
   _fill: function() {
     var element = {};
@@ -92,3 +95,21 @@ element.foo = {
 };
 return element;
 ```
+
+## _target example
+
+```
+element.foo = {
+  _theme: 'curtain',
+  _target: '#bar',
+  /* ... other stuff ... */
+};
+```
+
+Then somewhere else (maybe in a block, or somewhere else on your page) place the corresponding target element:
+
+```
+<div id="bar"></div>
+```
+
+This allows the curtain's `_fill` to render in the `bar` div.
