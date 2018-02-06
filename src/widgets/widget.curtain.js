@@ -99,8 +99,13 @@ dg.theme_curtain = function(variables) {
 
 };
 
+/**
+ * Renders and returns the html for the curtain's optional button wrapper prefix.
+ * @param {Object} curtain
+ * @returns {String}
+ * @private
+ */
 dg._curtainBtnWrapOpen = function(curtain) {
-
   var btnWrapper = curtain._button_wrapper ? curtain._button_wrapper : null;
   if (!btnWrapper) { return ''; }
   dg.elementAttributesInit(btnWrapper);
@@ -110,26 +115,47 @@ dg._curtainBtnWrapOpen = function(curtain) {
   return '<' + btnWrapper._format + ' ' + dg.attributes(btnWrapper._attributes) + '>'
 };
 
+/**
+ * Renders and returns the html for the curtain's optional button wrapper suffix.
+ * @param {Object} curtain
+ * @returns {String}
+ * @private
+ */
 dg._curtainBtnWrapClose = function(curtain) {
   return curtain._button_wrapper ? '</' + curtain._button_wrapper._format + '>' : '';
 };
 
+/**
+ * Renders the html for the curtain's button.
+ * @param btn
+ * @param curtain
+ * @param direction
+ * @returns {*}
+ * @private
+ */
 dg._curtainButtonRender = function(btn, curtain, direction) {
+  //console.log('_curtainButtonRender', direction, btn);
   var btnType = btn._type ? btn._type : 'link'; // or 'button'
   var btnText = btn._text ? btn._text : direction == 'open' ? '+' : '-';
   return btnType == 'link' ? dg.l(btnText, null, btn) : dg.b(btnText, btn);
 };
 
 dg._curtainClick = function(button, direction) {
-  //console.log(direction, button);
+  //console.log('_curtainClick', dg._curtains);
 
   // Grab the curtain id and load the curtain.
   var id = button.getAttribute('for');
   var curtain = dg._curtains[id];
   var isContext = !!curtain._context;
+  var hasTarget = !!curtain._target;
   var isPanel = !isContext && curtain._panel; // Context config overrides panel config, developer can't have both.
 
   var op = direction == 'open' ? 'close' : 'open';
+  //console.log('direction', direction);
+  //console.log('curtain', curtain);
+  //console.log('button', button);
+  //console.log('next op', op);
+
   var opKey = '_' + direction;
   var btnKey = '_' + op;
   var btnId = button.getAttribute('id');
@@ -141,12 +167,12 @@ dg._curtainClick = function(button, direction) {
   if (!isPanel) {
 
     // Create the opposite button.
-    // @TODO duplicate code.
     var btnOptions = curtain[btnKey] ? curtain[btnKey] : {};
     var btn = btnOptions.button ? btnOptions.button : {};
     if (!btn._attributes) { btn._attributes = {}; }
     btn._attributes.id = btnId;
-    if (!btn._attributes.onclick) { btn._attributes.onclick = "dg._curtainClick(this, '" + op + "')"; }
+    //if (!btn._attributes.onclick) { btn._attributes.onclick = "dg._curtainClick(this, '" + op + "')"; }
+    btn._attributes.onclick = "dg._curtainClick(this, '" + op + "')";
     if (!btn._attributes.for) { btn._attributes.for = id; }
 
     // Swap the buttons.
@@ -159,103 +185,122 @@ dg._curtainClick = function(button, direction) {
 
   // Place the container in the DOM the first time the curtain is opened, subsequent times, just toggle its visibility.
   if (direction == 'open') {
-    var container = document.getElementById(id);
-    if (!container) {
-      //console.log(curtain);
 
-      // Add class names for contexts or for panels.
-      var classNames = curtain._attributes.class;
-      if (isContext) {
-        classNames.push('context-menu');
-        if (curtain._context.side) { classNames.push('context-menu-' + curtain._context.side); }
-      }
-      else if (isPanel) {
-        classNames.push(
-            'side-panel',
-            curtain._panel.side ? 'side-panel-' + curtain._panel.side : 'side-panel-left'
-        );
-      }
-
-      // Create a dummy div wrapper, and then render the empty curtain container inside of it.
-      var format = curtain._format ? variables._format : 'div';
-      div = document.createElement('div');
-      div.innerHTML = '<' + format + ' ' + dg.attributes(curtain._attributes) + '></' + format + '>';
-
-      // Pull out the newly created element for the empty container, and place it after the button.
-      if (newButton) {
-        newButton.parentNode.insertBefore(div.firstChild, newButton.nextSibling);
-      }
-      else {
-        button.parentNode.insertBefore(div.firstChild, button.nextSibling);
-      }
-
-
-      // Render the content to be filled in the container.
-      var fill = dg.render(curtain._fill());
-
-      if (isPanel) {
-
-        // Create the close button.
-        // @TODO duplicate code.
-        var closeOptions = curtain._close ? curtain._close : {};
-        var closeBtn = closeOptions.button ? closeOptions.button : {};
-        if (!closeBtn._attributes) { closeBtn._attributes = {}; }
-        closeBtn._attributes.id = btnId;
-        if (!closeBtn._attributes.onclick) { closeBtn._attributes.onclick = "dg._curtainClick(this, 'close')"; }
-        if (!closeBtn._attributes.for) { closeBtn._attributes.for = id; }
-
-        // Put the close button at the top of the panel.
-        fill = dg._curtainButtonRender(closeBtn, curtain, 'close') + fill;
-
-      }
-
-      // Now that the container exists in the DOM, grab it and fill the content.
+    var container = null;
+    if (!hasTarget) {
       container = document.getElementById(id);
-      container.innerHTML = direction == 'open' ? fill : '';
+      if (!container) {
+        //console.log(curtain);
 
-      // Set up a post render with timeout...
-      dg._postRender.push(function() {
-        setTimeout(function() {
+        // Add class names for contexts or for panels.
+        var classNames = curtain._attributes.class;
+        if (isContext) {
+          classNames.push('context-menu');
+          if (curtain._context.side) { classNames.push('context-menu-' + curtain._context.side); }
+        }
+        else if (isPanel) {
+          classNames.push(
+              'side-panel',
+              curtain._panel.side ? 'side-panel-' + curtain._panel.side : 'side-panel-left'
+          );
+        }
 
-          // Listen for clicks outside modal to close it.
-          if (isContext) {
-            //console.log('add event listener');
-            //window.addEventListener('click', dg_curtain.onclick, false);
-          }
-          // To slide open the panel.
-          else if (isPanel) {
-            document.getElementById(id).style.width = "250px";
-          }
+        // Create a dummy div wrapper, and then render the empty curtain container inside of it.
+        var format = curtain._format ? variables._format : 'div';
+        div = document.createElement('div');
+        div.innerHTML = '<' + format + ' ' + dg.attributes(curtain._attributes) + '></' + format + '>';
 
-        }, 50);
-      });
+        // Pull out the newly created element for the empty container, and place it after the button.
+        if (newButton) {
+          newButton.parentNode.insertBefore(div.firstChild, newButton.nextSibling);
+        }
+        else {
+          button.parentNode.insertBefore(div.firstChild, button.nextSibling);
+        }
 
-      // If it's a context menu, offset its left/right position in a negative direction using the width of the content
-      // in the menu, thus bringing it back into view.
-      //if (isContext) {
-      //  console.log(container.offsetWidth);
-      //  container.style.left = '-' + container.offsetWidth + 'px';
-      //}
 
-      // Run any post renders.
-      dg.runPostRenders();
+        // Render the content to be filled in the container.
+        var fill = dg.render(curtain._fill());
 
-    }
-    else {
+        if (isPanel) {
 
-      // Make the container visible again.
-      var curtainElement = document.getElementById(id);
-      if (isPanel) {
-        curtainElement.style.width = "250px";
+          // Create the close button.
+          // @TODO duplicate code.
+          var closeOptions = curtain._close ? curtain._close : {};
+          var closeBtn = closeOptions.button ? closeOptions.button : {};
+          if (!closeBtn._attributes) { closeBtn._attributes = {}; }
+          closeBtn._attributes.id = btnId;
+          if (!closeBtn._attributes.onclick) { closeBtn._attributes.onclick = "dg._curtainClick(this, 'close')"; }
+          if (!closeBtn._attributes.for) { closeBtn._attributes.for = id; }
+
+          // Put the close button at the top of the panel.
+          fill = dg._curtainButtonRender(closeBtn, curtain, 'close') + fill;
+
+        }
+
+        // Now that the container exists in the DOM, grab it and fill the content.
+        container = document.getElementById(id);
+        container.innerHTML = direction == 'open' ? fill : '';
+
+        // For contexts or panels, set up a post render with timeout...
+        if (isContext || isPanel) {
+
+          dg._postRender.push(function() {
+            setTimeout(function() {
+
+              // Listen for clicks outside modal to close it.
+              if (isContext) {
+                //console.log('add event listener');
+                //window.addEventListener('click', dg_curtain.onclick, false);
+              }
+              // To slide open the panel.
+              else if (isPanel) {
+                document.getElementById(id).style.width = "250px";
+              }
+
+            }, 50);
+          });
+        }
+
+        // If it's a context menu, offset its left/right position in a negative direction using the width of the content
+        // in the menu, thus bringing it back into view.
+        //if (isContext) {
+        //  console.log(container.offsetWidth);
+        //  container.style.left = '-' + container.offsetWidth + 'px';
+        //}
+
+        // Run any post renders.
+        dg.runPostRenders();
+
       }
       else {
-        curtainElement.style.display = 'block';
-        //if (isContext) {
-        //  setTimeout(function() {
-        //    console.log('add event listener');
-        //    window.addEventListener('click', dg_curtain.onclick, false);
-        //  }, 1);
-        //}
+
+        // Make the container visible again.
+        var curtainElement = document.getElementById(id);
+        if (isPanel) {
+          curtainElement.style.width = "250px";
+        }
+        else {
+          //curtainElement.style.display = 'block';
+          dg.show(curtainElement);
+          //if (isContext) {
+          //  setTimeout(function() {
+          //    console.log('add event listener');
+          //    window.addEventListener('click', dg_curtain.onclick, false);
+          //  }, 1);
+          //}
+        }
+
+      }
+    }
+    else { // The curtain has a target and is opening...
+
+      // Grab the target container then render the content into it the first time only, otherwise just make it visible
+      // all subsequent times.
+      container = dg.qs(curtain._target);
+      if (container) {
+        if (container.innerHTML == '') { container.innerHTML = dg.render(curtain._fill()); }
+        else { dg.show(container); }
       }
 
     }
@@ -266,9 +311,9 @@ dg._curtainClick = function(button, direction) {
   else { // Closing...
 
     // Hide the container.
-    var curtainElement = document.getElementById(id);
+    var curtainElement = !hasTarget ? document.getElementById(id) : dg.qs(curtain._target);
     if (isPanel) { curtainElement.style.width = '0'; }
-    else { curtainElement.style.display = 'none'; }
+    else { dg.hide(curtainElement); }
 
     dg_curtain.clearCurtain();
 
