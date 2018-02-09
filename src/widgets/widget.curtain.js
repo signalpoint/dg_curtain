@@ -26,8 +26,7 @@ dg_curtain.getContainer = function() {
 
 dg_curtain.isOpen = function() {
   var container = dg_curtain.getContainer();
-  console.log(container);
-  return container && container.style.display != 'none';
+  return container && dg.isVisible(container);
 };
 
 dg_curtain.close = function() {
@@ -141,7 +140,7 @@ dg._curtainButtonRender = function(btn, curtain, direction) {
 };
 
 dg._curtainClick = function(button, direction) {
-  //console.log('_curtainClick', dg._curtains);
+  //console.log('_curtainClick', dg._curtains, button, direction);
 
   // Grab the curtain id and load the curtain.
   var id = button.getAttribute('for');
@@ -300,7 +299,7 @@ dg._curtainClick = function(button, direction) {
       container = dg.qs(curtain._target);
       if (container) {
         if (container.innerHTML == '') { container.innerHTML = dg.render(curtain._fill()); }
-        else { dg.show(container); }
+        dg.show(container);
       }
 
     }
