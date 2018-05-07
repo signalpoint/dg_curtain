@@ -169,7 +169,7 @@ dg._curtainClick = function(button, direction) {
     var btnOptions = curtain[btnKey] ? curtain[btnKey] : {};
     var btn = btnOptions.button ? btnOptions.button : {};
     if (!btn._attributes) { btn._attributes = {}; }
-    btn._attributes.id = btnId;
+    if (!btn._attributes.id) { btn._attributes.id = btnId; }
     //if (!btn._attributes.onclick) { btn._attributes.onclick = "dg._curtainClick(this, '" + op + "')"; }
     btn._attributes.onclick = "dg._curtainClick(this, '" + op + "')";
     if (!btn._attributes.for) { btn._attributes.for = id; }
@@ -228,7 +228,7 @@ dg._curtainClick = function(button, direction) {
           var closeOptions = curtain._close ? curtain._close : {};
           var closeBtn = closeOptions.button ? closeOptions.button : {};
           if (!closeBtn._attributes) { closeBtn._attributes = {}; }
-          closeBtn._attributes.id = btnId;
+          if (!closeBtn._attributes.id) { closeBtn._attributes.id = btnId; }
           if (!closeBtn._attributes.onclick) { closeBtn._attributes.onclick = "dg._curtainClick(this, 'close')"; }
           if (!closeBtn._attributes.for) { closeBtn._attributes.for = id; }
 
