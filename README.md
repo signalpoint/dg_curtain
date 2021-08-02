@@ -21,10 +21,10 @@ var html = dg.theme('curtain', {
     },
     
     // Optional: Do something before opening the curtain.
-    before: function() { /** do stuff **/ },
+    before: function(btn, curtain) { /** do stuff **/ },
     
     // Optional: Do something after opening the curtain.
-    after: function() { /** do stuff **/ }
+    after: function(btn, curtain) { /** do stuff **/ }
   },
   
   // Optional: Used to open the curtain in a context menu.
@@ -63,10 +63,10 @@ var html = dg.theme('curtain', {
     },
     
     // Optional: Do something before closing the curtain.
-    before: function() { /** do stuff **/ },
+    before: function(btn, curtain) { /** do stuff **/ },
     
     // Optional: Do something after closing the curtain.
-    after: function() { /** do stuff **/ }
+    after: function(btn, curtain) { /** do stuff **/ }
   },
   
   // Optional: A wrapper around the button.
