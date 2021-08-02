@@ -1,39 +1,58 @@
+var makeBinary = true;
+
 var gulp = require('gulp'),
     watch = require('gulp-watch'),
     gp_concat = require('gulp-concat'),
     gp_rename = require('gulp-rename'),
     gp_uglify = require('gulp-uglify'),
-    minifyCSS = require('gulp-minify-css');
+    gp_minify_css = require('gulp-minify-css');
 
-var dgCurtainModuleSrc = [
+var jsSrc = [
   './src/_dg_curtain.js',
   './src/widgets/widget.*.js'
 ];
 
-var dgCurtainCssSrc = ['./css/*.css'];
+// Minify JavaScript
+function minifyJs() {
+  console.log('compressing dg_curtain.js...');
+  var js = gulp.src(jsSrc)
+    .pipe(gp_concat('dg_curtain.js'))
+    .pipe(gulp.dest('./'));
+  if (makeBinary) {
+    console.log('compressing dg_curtain.min.js...');
+    return js.pipe(gp_rename('dg_curtain.min.js'))
+    .pipe(gp_uglify())
+    .pipe(gulp.dest('./'));
+  }
+  return js;
+}
+gulp.task(minifyJs);
 
-// Task to build the dg_curtain.min.js file.
-gulp.task('minifyJS', function(){
-  return gulp.src(dgCurtainModuleSrc)
-      .pipe(gp_concat('concat.js'))
-      .pipe(gulp.dest(''))
-      .pipe(gp_rename('dg_curtain.min.js'))
-      .pipe(gp_uglify())
-      .pipe(gulp.dest(''));
-});
+var cssSrc = [
+  './css/*.css'
+];
 
-// Task to build the dg_curtain.min.css file.
-gulp.task('minifyCSS', function(){
-  gulp.src(dgCurtainCssSrc)
-      .pipe(gp_concat('concat.css'))
-      .pipe(gulp.dest(''))
-      .pipe(gp_rename('dg_curtain.min.css'))
-      .pipe(minifyCSS())
-      .pipe(gulp.dest(''));
-});
+// Minify CSS
+function minifyCss() {
+  console.log('compressing dg_curtain.css...');
+  var css = gulp.src(cssSrc)
+    .pipe(gp_concat('dg_curtain.css'))
+    .pipe(gulp.dest('./'));
+  if (makeBinary) {
+    console.log('compressing dg_curtain.min.css...');
+    return css.pipe(gp_rename('dg_curtain.min.css'))
+    .pipe(gp_minify_css())
+    .pipe(gulp.dest('./'));
+  }
+  return css;
+}
+gulp.task(minifyCss);
 
-gulp.task('default', function () {
-  watch(dgCurtainModuleSrc, function(event) { gulp.start('minifyJS') });
-  watch(dgCurtainCssSrc, function(event) { gulp.start('minifyCSS') });
-  gulp.start(['minifyJS', 'minifyCSS']);
+gulp.task('default', function(done) {
+
+  gulp.watch(jsSrc, gulp.series('minifyJs'));
+  gulp.watch(cssSrc, gulp.series('minifyCss'));
+
+  done();
+
 });
