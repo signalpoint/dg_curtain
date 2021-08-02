@@ -1,3 +1,7 @@
+// TODO
+// - the random salt used for the open and close button ids collide;
+//     unless the developer provides an id for each button)
+
 dg._curtains = {};
 
 dg_curtain._curtain = null;
@@ -15,8 +19,17 @@ dg_curtain.clearCurtain = function() {
 };
 
 dg_curtain.getButton = function() {
+  return dg_curtain.getOpenButton();
+};
+
+dg_curtain.getOpenButton = function() {
   var curtain = dg_curtain.getCurtain();
   return curtain ? document.getElementById(curtain._open.button._attributes.id) : null;
+};
+
+dg_curtain.getCloseButton = function() {
+  var curtain = dg_curtain.getCurtain();
+  return curtain ? document.getElementById(curtain._close.button._attributes.id) : null;
 };
 
 dg_curtain.getContainer = function() {
@@ -30,7 +43,7 @@ dg_curtain.isOpen = function() {
 };
 
 dg_curtain.close = function() {
-  var button = dg_curtain.getButton();
+  var button = dg_curtain.getCloseButton();
   if (button) {
     //console.log('removing click handler');
     //window.removeEventListener('click', dg_curtain.onclick);
@@ -182,6 +195,8 @@ dg._curtainClick = function(button, direction) {
 
   }
 
+  var openPanel = function(el) { el.style.width = "250px"; };
+
   // Place the container in the DOM the first time the curtain is opened, subsequent times, just toggle its visibility.
   if (direction == 'open') {
 
@@ -254,7 +269,7 @@ dg._curtainClick = function(button, direction) {
               }
               // To slide open the panel.
               else if (isPanel) {
-                document.getElementById(id).style.width = "250px";
+                openPanel(document.getElementById(id));
               }
 
             }, 50);
@@ -274,10 +289,12 @@ dg._curtainClick = function(button, direction) {
       }
       else {
 
+        // The container already existed in the DOM...
+
         // Make the container visible again.
         var curtainElement = document.getElementById(id);
         if (isPanel) {
-          curtainElement.style.width = "250px";
+          openPanel(curtainElement);
         }
         else {
           //curtainElement.style.display = 'block';
