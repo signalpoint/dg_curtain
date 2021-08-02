@@ -20,7 +20,6 @@
     position: fixed; /* Stay in place */
     z-index: 1; /* Stay on top */
     top: 0;
-    background-color: #111; /* Black*/
     overflow-x: hidden; /* Disable horizontal scroll */
     padding-top: 60px; /* Place content 60px from the top */
     transition: 0.5s; /* 0.5 second transition effect to slide in the side-panel */
@@ -37,17 +36,13 @@
 
 /* The navigation menu links */
 .curtain.side-panel a {
-    padding: 8px 8px 8px 32px;
     text-decoration: none;
-    font-size: 25px;
-    color: #818181;
     display: block;
     transition: 0.3s
 }
 
 /* When you mouse over the navigation links, change their color */
 .curtain.side-panel a:hover, .offcanvas a:focus{
-    color: #f1f1f1;
 }
 
 /* Position and style the close button (top right corner) */
