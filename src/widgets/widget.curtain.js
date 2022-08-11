@@ -77,7 +77,7 @@ dg.theme_curtain = function(variables) {
   // @TODO duplicate code.
   var openOptions = variables._open ? variables._open : {};
   var openBtn = openOptions.button ? openOptions.button : {};
-  if (!openBtn._attributes) { openBtn._attributes = {}; }
+  dg.attributesInit(openBtn);
   if (!openBtn._attributes.id) { openBtn._attributes.id = dg.salt(); }
   if (!openBtn._attributes.onclick) { openBtn._attributes.onclick = "dg._curtainClick(this, 'open')"; }
   if (!openBtn._attributes.for) { openBtn._attributes.for = id; }
@@ -146,7 +146,6 @@ dg._curtainBtnWrapClose = function(curtain) {
  * @private
  */
 dg._curtainButtonRender = function(btn, curtain, direction) {
-  //console.log('_curtainButtonRender', direction, btn);
   var btnType = btn._type ? btn._type : 'link'; // or 'button'
   var btnText = btn._text ? btn._text : direction == 'open' ? '+' : '-';
   return btnType == 'link' ? dg.l(btnText, null, btn) : dg.b(btnText, btn);
@@ -181,7 +180,7 @@ dg._curtainClick = function(button, direction) {
     // Create the opposite button.
     var btnOptions = curtain[btnKey] ? curtain[btnKey] : {};
     var btn = btnOptions.button ? btnOptions.button : {};
-    if (!btn._attributes) { btn._attributes = {}; }
+    dg.attributesInit(btn);
     if (!btn._attributes.id) { btn._attributes.id = btnId; }
     //if (!btn._attributes.onclick) { btn._attributes.onclick = "dg._curtainClick(this, '" + op + "')"; }
     btn._attributes.onclick = "dg._curtainClick(this, '" + op + "')";
