@@ -9,6 +9,8 @@ var gulp = require('gulp'),
 
 var jsSrc = [
   './src/_dg_curtain.js',
+  './src/classes/class.*.js',
+  './src/includes/include.*.js',
   './src/widgets/widget.*.js'
 ];
 
