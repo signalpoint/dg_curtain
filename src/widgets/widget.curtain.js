@@ -231,7 +231,6 @@ dg._curtainClick = function(button, direction) {
           button.parentNode.insertBefore(div.firstChild, button.nextSibling);
         }
 
-
         // Render the content to be filled in the container.
         var fill = dg.render(curtain._fill());
 
